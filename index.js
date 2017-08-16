@@ -11,6 +11,7 @@ var SECOND = 1000
 
 srt.fromString = fromString
 srt.merge = merge
+srt.toString = toString
 
 module.exports = srt
 
@@ -29,6 +30,27 @@ function returnParsedData(language, callback, err, data) {
 function fromString(language, stringData) {
     var segments = stringData.split((stringData.search("\n\r\n") != -1) ? "\n\r\n" : "\n\n" )
     return reduce(segments, createSrtData, language, [])
+}
+
+function toString(json_data) {
+    var str_data = ""
+    var tmp=""
+    for (var ele in json_data){
+        tmp = srtData2String(json_data[ele])
+        str_data += tmp;
+        str_data += "\r\n"
+    }
+    return str_data;
+}
+
+function srtData2String(srtData){
+    var str =srtData.number.toString()+"\n";
+    str += time2String(srtData.startTime)+ " --> " + time2String(srtData.endTime)+"\n";
+    for (var lan in srtData.languages){
+        str += srtData.languages[lan]
+        str += "\n"
+    }
+    return str
 }
 
 function createSrtData(memo, string) {
@@ -69,6 +91,20 @@ function parseTime(timeString) {
         MINUTE * minutes +
         SECOND * seconds +
         milliSeconds
+}
+
+function time2String(time_val) {
+    if (typeof(time_val)=="string"){
+        time_val = parseInt(time_val,10);
+    }
+    var hours = Math.floor(time_val/HOUR)
+        , minutes = Math.floor((time_val%HOUR)/MINUTE)
+        , seconds = Math.floor((time_val%MINUTE)/SECOND)
+        , milliSeconds = time_val%SECOND;
+
+    var time_str = hours.toString() + ':' + minutes.toString() + ':' + seconds.toString() + ',' + milliSeconds.toString();
+
+    return time_str;
 }
 
 function merge(srt) {
